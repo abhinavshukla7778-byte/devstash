@@ -1,13 +1,14 @@
 import StatsCards from '@/components/dashboard/StatsCards';
 import CollectionsGrid from '@/components/dashboard/CollectionsGrid';
 import ItemList from '@/components/dashboard/ItemList';
-import { mockItems, mockCollections, mockItemTypeCounts } from '@/lib/mock-data';
+import { mockItems } from '@/lib/mock-data';
+import { getRecentCollections, getDashboardStats } from '@/lib/db/collections';
 
-export default function DashboardPage() {
-  const totalItems = Object.values(mockItemTypeCounts).reduce((a, b) => a + b, 0);
-  const totalCollections = mockCollections.length;
-  const favoriteItems = mockItems.filter((i) => i.isFavorite).length;
-  const favoriteCollections = mockCollections.filter((c) => c.isFavorite).length;
+export default async function DashboardPage() {
+  const [stats, collections] = await Promise.all([
+    getDashboardStats(),
+    getRecentCollections(6),
+  ]);
 
   const pinnedItems = mockItems.filter((i) => i.isPinned);
   const recentItems = [...mockItems]
@@ -24,13 +25,13 @@ export default function DashboardPage() {
       </div>
 
       <StatsCards
-        totalItems={totalItems}
-        totalCollections={totalCollections}
-        favoriteItems={favoriteItems}
-        favoriteCollections={favoriteCollections}
+        totalItems={stats.totalItems}
+        totalCollections={stats.totalCollections}
+        favoriteItems={stats.favoriteItems}
+        favoriteCollections={stats.favoriteCollections}
       />
 
-      <CollectionsGrid />
+      <CollectionsGrid collections={collections} />
 
       <ItemList title="Pinned" items={pinnedItems} />
 
