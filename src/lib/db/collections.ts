@@ -80,6 +80,51 @@ export async function getRecentCollections(limit = 6): Promise<CollectionCardDat
   });
 }
 
+export interface SidebarCollection {
+  id: string;
+  name: string;
+  isFavorite: boolean;
+  dominantColor: string;
+}
+
+export async function getSidebarCollections(): Promise<SidebarCollection[]> {
+  const collections = await prisma.collection.findMany({
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { type: true },
+          },
+        },
+      },
+    },
+    orderBy: { updatedAt: 'desc' },
+    take: 10,
+  });
+
+  return collections.map((collection) => {
+    const typeCounts: Record<string, { count: number; color: string }> = {};
+
+    for (const ci of collection.items) {
+      const { type } = ci.item;
+      if (!typeCounts[type.id]) {
+        typeCounts[type.id] = { count: 0, color: type.color ?? DEFAULT_COLOR };
+      }
+      typeCounts[type.id].count++;
+    }
+
+    const sorted = Object.values(typeCounts).sort((a, b) => b.count - a.count);
+    const dominantColor = sorted[0]?.color ?? DEFAULT_COLOR;
+
+    return {
+      id: collection.id,
+      name: collection.name,
+      isFavorite: collection.isFavorite,
+      dominantColor,
+    };
+  });
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count(),
