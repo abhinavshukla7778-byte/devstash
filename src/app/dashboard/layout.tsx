@@ -1,9 +1,20 @@
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { getSidebarCollections } from "@/lib/db/collections";
+import { getSystemItemTypes } from "@/lib/db/items";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardShell>{children}</DashboardShell>;
+  const [itemTypes, sidebarCollections] = await Promise.all([
+    getSystemItemTypes(),
+    getSidebarCollections(),
+  ]);
+
+  return (
+    <DashboardShell itemTypes={itemTypes} sidebarCollections={sidebarCollections}>
+      {children}
+    </DashboardShell>
+  );
 }
