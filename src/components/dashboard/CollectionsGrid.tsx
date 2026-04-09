@@ -1,26 +1,22 @@
-import { Star, MoreHorizontal, Code, Sparkles, Terminal, StickyNote, File, Link2 } from 'lucide-react';
+import { Star, MoreHorizontal, Code, Sparkles, Terminal, StickyNote, File, Image, Link } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { mockCollections } from '@/lib/mock-data';
+import type { CollectionCardData } from '@/lib/db/collections';
 
-interface TypeIcon {
-  Icon: LucideIcon;
-  color: string;
-}
-
-const collectionTypeIcons: Record<string, TypeIcon[]> = {
-  coll_1: [{ Icon: Code, color: '#3b82f6' }, { Icon: Link2, color: '#10b981' }],
-  coll_2: [{ Icon: Code, color: '#3b82f6' }, { Icon: File, color: '#6b7280' }],
-  coll_3: [{ Icon: File, color: '#6b7280' }, { Icon: Link2, color: '#10b981' }, { Icon: StickyNote, color: '#fde047' }],
-  coll_4: [{ Icon: Code, color: '#3b82f6' }, { Icon: StickyNote, color: '#fde047' }, { Icon: Link2, color: '#10b981' }],
-  coll_5: [{ Icon: Terminal, color: '#f97316' }, { Icon: Code, color: '#3b82f6' }],
-  coll_6: [{ Icon: Sparkles, color: '#8b5cf6' }, { Icon: Terminal, color: '#f97316' }, { Icon: Link2, color: '#10b981' }],
+const ICON_MAP: Record<string, LucideIcon> = {
+  Code,
+  Sparkles,
+  Terminal,
+  StickyNote,
+  File,
+  Image,
+  Link,
 };
 
-export default function CollectionsGrid() {
-  const collections = [...mockCollections].sort(
-    (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
-  );
+interface CollectionsGridProps {
+  collections: CollectionCardData[];
+}
 
+export default function CollectionsGrid({ collections }: CollectionsGridProps) {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
@@ -31,11 +27,11 @@ export default function CollectionsGrid() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {collections.map((collection) => {
-          const typeIcons = collectionTypeIcons[collection.id] ?? [{ Icon: Code, color: '#3b82f6' }];
           return (
             <div
               key={collection.id}
-              className="bg-card border border-border rounded-lg p-4 hover:border-muted-foreground/30 cursor-pointer transition-colors"
+              className="bg-card border rounded-lg p-4 hover:opacity-90 cursor-pointer transition-opacity"
+              style={{ borderColor: collection.dominantColor + '55' }}
             >
               <div className="flex items-start justify-between mb-1">
                 <div className="flex items-center gap-2 min-w-0">
@@ -49,15 +45,16 @@ export default function CollectionsGrid() {
                 </button>
               </div>
               <p className="text-xs text-muted-foreground mb-2">
-                {collection.itemCount} items
+                {collection.itemCount} {collection.itemCount === 1 ? 'item' : 'items'}
               </p>
               <p className="text-sm text-muted-foreground mb-4 line-clamp-1">
                 {collection.description}
               </p>
               <div className="flex items-center gap-2">
-                {typeIcons.map(({ Icon, color }, i) => (
-                  <Icon key={i} className="w-3.5 h-3.5" style={{ color }} />
-                ))}
+                {collection.typeIcons.map(({ icon, color }, i) => {
+                  const TypeIcon = ICON_MAP[icon] ?? Code;
+                  return <TypeIcon key={i} className="w-3.5 h-3.5" style={{ color }} />;
+                })}
               </div>
             </div>
           );
