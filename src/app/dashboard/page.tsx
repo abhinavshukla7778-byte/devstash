@@ -1,19 +1,16 @@
 import StatsCards from '@/components/dashboard/StatsCards';
 import CollectionsGrid from '@/components/dashboard/CollectionsGrid';
 import ItemList from '@/components/dashboard/ItemList';
-import { mockItems } from '@/lib/mock-data';
 import { getRecentCollections, getDashboardStats } from '@/lib/db/collections';
+import { getPinnedItems, getRecentItems } from '@/lib/db/items';
 
 export default async function DashboardPage() {
-  const [stats, collections] = await Promise.all([
+  const [stats, collections, pinnedItems, recentItems] = await Promise.all([
     getDashboardStats(),
     getRecentCollections(6),
+    getPinnedItems(),
+    getRecentItems(10),
   ]);
-
-  const pinnedItems = mockItems.filter((i) => i.isPinned);
-  const recentItems = [...mockItems]
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, 10);
 
   return (
     <div className="p-6 space-y-8">

@@ -1,36 +1,21 @@
-import { Code, Sparkles, Terminal, StickyNote, File, Image, Link2, Star, Pin } from 'lucide-react';
+import { Code, Sparkles, Terminal, StickyNote, File, Image, Link, Star, Pin } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import type { ItemCardData } from '@/lib/db/items';
 
-interface Item {
-  id: string;
-  title: string;
-  description: string | null;
-  isFavorite: boolean;
-  isPinned: boolean;
-  tags: string[];
-  createdAt: Date;
-  itemTypeId: string;
-}
+const ICON_MAP: Record<string, LucideIcon> = {
+  Code,
+  Sparkles,
+  Terminal,
+  StickyNote,
+  File,
+  Image,
+  Link,
+};
 
 interface ItemListProps {
   title: string;
-  items: Item[];
+  items: ItemCardData[];
 }
-
-interface TypeConfig {
-  icon: LucideIcon;
-  color: string;
-}
-
-const typeConfig: Record<string, TypeConfig> = {
-  type_1: { icon: Code, color: '#3b82f6' },
-  type_2: { icon: Sparkles, color: '#8b5cf6' },
-  type_3: { icon: Terminal, color: '#f97316' },
-  type_4: { icon: StickyNote, color: '#fde047' },
-  type_5: { icon: File, color: '#6b7280' },
-  type_6: { icon: Image, color: '#ec4899' },
-  type_7: { icon: Link2, color: '#10b981' },
-};
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -44,18 +29,18 @@ export default function ItemList({ title, items }: ItemListProps) {
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
       <div className="space-y-2">
         {items.map((item) => {
-          const config = typeConfig[item.itemTypeId] ?? typeConfig['type_1'];
-          const Icon = config.icon;
+          const Icon = ICON_MAP[item.typeIcon] ?? Code;
           return (
             <div
               key={item.id}
-              className="bg-card border border-border rounded-lg px-4 py-3 flex items-center gap-3 hover:border-muted-foreground/30 cursor-pointer transition-colors"
+              className="bg-card border rounded-lg px-4 py-3 flex items-center gap-3 hover:opacity-90 cursor-pointer transition-opacity"
+              style={{ borderColor: item.typeColor + '55' }}
             >
               <div
                 className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${config.color}20` }}
+                style={{ backgroundColor: `${item.typeColor}20` }}
               >
-                <Icon className="w-4 h-4" style={{ color: config.color }} />
+                <Icon className="w-4 h-4" style={{ color: item.typeColor }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
@@ -66,6 +51,12 @@ export default function ItemList({ title, items }: ItemListProps) {
                   {item.isPinned && (
                     <Pin className="w-3 h-3 text-blue-400 shrink-0" />
                   )}
+                  <span
+                    className="px-1.5 py-0.5 text-xs rounded-sm shrink-0"
+                    style={{ backgroundColor: `${item.typeColor}20`, color: item.typeColor }}
+                  >
+                    {item.typeName}
+                  </span>
                   {item.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
