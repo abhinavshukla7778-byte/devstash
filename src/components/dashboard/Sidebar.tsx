@@ -17,6 +17,7 @@ import {
   PanelLeftOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 import type { SidebarItemType } from '@/lib/db/items';
 import type { SidebarCollection } from '@/lib/db/collections';
 
@@ -87,6 +88,9 @@ export default function Sidebar({ open, onToggle, onClose, itemTypes, sidebarCol
                   >
                     <Icon className="w-4 h-4 shrink-0" style={{ color: type.color }} />
                     <span className="capitalize flex-1">{type.name}s</span>
+                    {(type.name === 'file' || type.name === 'image') && (
+                      <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 leading-none">PRO</Badge>
+                    )}
                     <span className="text-xs text-muted-foreground">{type.count}</span>
                   </Link>
                 </li>
