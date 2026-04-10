@@ -209,6 +209,74 @@ export async function updateItem(
   };
 }
 
+export async function createItem(
+  userId: string,
+  data: {
+    title: string;
+    typeName: string;
+    description: string | null;
+    content: string | null;
+    url: string | null;
+    language: string | null;
+    tags: string[];
+  }
+): Promise<ItemDetailData> {
+  const type = await prisma.itemType.findFirst({
+    where: { name: data.typeName, isSystem: true },
+  });
+  if (!type) throw new Error(`Unknown item type: ${data.typeName}`);
+
+  const item = await prisma.item.create({
+    data: {
+      title: data.title,
+      contentType: 'text',
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      userId,
+      typeId: type.id,
+      tags: {
+        create: data.tags.map((name) => ({
+          tag: {
+            connectOrCreate: {
+              where: { name_userId: { name, userId } },
+              create: { name, user: { connect: { id: userId } } },
+            },
+          },
+        })),
+      },
+    },
+    include: {
+      type: true,
+      tags: { include: { tag: true } },
+      collections: { include: { collection: true } },
+    },
+  });
+
+  return {
+    id: item.id,
+    title: item.title,
+    content: item.content,
+    description: item.description,
+    url: item.url,
+    language: item.language,
+    contentType: item.contentType,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    tags: item.tags.map((t) => t.tag.name),
+    collections: item.collections.map((c) => ({
+      id: c.collection.id,
+      name: c.collection.name,
+    })),
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    typeIcon: item.type.icon ?? DEFAULT_ICON,
+    typeColor: item.type.color ?? DEFAULT_COLOR,
+    typeName: item.type.name,
+  };
+}
+
 export async function getItemsByType(typeName: string): Promise<{ items: ItemCardData[]; typeColor: string; typeName: string } | null> {
   const type = await prisma.itemType.findFirst({
     where: { name: typeName, isSystem: true },
