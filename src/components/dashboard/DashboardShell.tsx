@@ -6,13 +6,20 @@ import Sidebar from './Sidebar';
 import type { SidebarItemType } from '@/lib/db/items';
 import type { SidebarCollection } from '@/lib/db/collections';
 
+interface SessionUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
 interface DashboardShellProps {
   children: React.ReactNode;
+  user: SessionUser | null;
   itemTypes: SidebarItemType[];
   sidebarCollections: SidebarCollection[];
 }
 
-export default function DashboardShell({ children, itemTypes, sidebarCollections }: DashboardShellProps) {
+export default function DashboardShell({ children, user, itemTypes, sidebarCollections }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -23,6 +30,7 @@ export default function DashboardShell({ children, itemTypes, sidebarCollections
           open={sidebarOpen}
           onToggle={() => setSidebarOpen((prev) => !prev)}
           onClose={() => setSidebarOpen(false)}
+          user={user}
           itemTypes={itemTypes}
           sidebarCollections={sidebarCollections}
         />

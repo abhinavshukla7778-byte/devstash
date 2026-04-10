@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { signOut } from 'next-auth/react';
 import {
   Code,
   Sparkles,
@@ -15,9 +16,12 @@ import {
   Star,
   PanelLeftClose,
   PanelLeftOpen,
+  LogOut,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import UserAvatar from '@/components/ui/UserAvatar';
 import type { SidebarItemType } from '@/lib/db/items';
 import type { SidebarCollection } from '@/lib/db/collections';
 
@@ -31,17 +35,50 @@ const iconMap: Record<string, React.ComponentType<{ className?: string; style?: 
   Link: Link2,
 };
 
+interface SessionUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
 interface SidebarProps {
   open: boolean;
   onToggle: () => void;
   onClose: () => void;
+  user: SessionUser | null;
   itemTypes: SidebarItemType[];
   sidebarCollections: SidebarCollection[];
 }
 
-export default function Sidebar({ open, onToggle, onClose, itemTypes, sidebarCollections }: SidebarProps) {
+function UserDropdown({ onClose }: { onClose: () => void }) {
+  return (
+    <>
+      <div className="fixed inset-0 z-10" onClick={onClose} />
+      <div className="absolute bottom-full left-2 right-2 mb-1 bg-popover border border-border rounded-md shadow-lg z-20 py-1">
+        <Link
+          href="/profile"
+          className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors"
+          onClick={onClose}
+        >
+          <User className="w-4 h-4" />
+          Profile
+        </Link>
+        <button
+          onClick={() => signOut({ callbackUrl: '/sign-in' })}
+          className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors text-destructive"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign out
+        </button>
+      </div>
+    </>
+  );
+}
+
+export default function Sidebar({ open, onToggle, onClose, user, itemTypes, sidebarCollections }: SidebarProps) {
   const [typesExpanded, setTypesExpanded] = useState(true);
   const [collectionsExpanded, setCollectionsExpanded] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const favoriteCollections = sidebarCollections.filter((c) => c.isFavorite);
   const recentCollections = sidebarCollections.filter((c) => !c.isFavorite).slice(0, 3);
@@ -173,17 +210,21 @@ export default function Sidebar({ open, onToggle, onClose, itemTypes, sidebarCol
         )}
       </div>
 
-      {/* User avatar — expanded */}
-      <div className="border-t border-border p-3">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-accent cursor-pointer transition-colors">
-          <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold shrink-0">
-            DS
-          </div>
+      {/* User section — expanded */}
+      <div className="border-t border-border p-3 relative">
+        <button
+          onClick={() => setDropdownOpen((prev) => !prev)}
+          className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-accent cursor-pointer transition-colors w-full text-left"
+        >
+          <UserAvatar name={user?.name} image={user?.image} className="w-7 h-7 text-xs shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">DevStash</p>
-            <p className="text-xs text-muted-foreground truncate">demo@devstash.io</p>
+            <p className="text-sm font-medium truncate">{user?.name ?? 'User'}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email ?? ''}</p>
           </div>
-        </div>
+        </button>
+        {dropdownOpen && (
+          <UserDropdown onClose={() => setDropdownOpen(false)} />
+        )}
       </div>
     </div>
   );
@@ -216,13 +257,17 @@ export default function Sidebar({ open, onToggle, onClose, itemTypes, sidebarCol
       })}
 
       {/* User avatar — collapsed */}
-      <div className="mt-auto border-t border-border w-full pt-3 flex justify-center">
-        <div
-          title="DevStash"
-          className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold cursor-pointer"
+      <div className="mt-auto border-t border-border w-full pt-3 flex justify-center relative">
+        <button
+          title={user?.name ?? 'User'}
+          onClick={() => setDropdownOpen((prev) => !prev)}
+          className="cursor-pointer"
         >
-          DS
-        </div>
+          <UserAvatar name={user?.name} image={user?.image} className="w-7 h-7 text-xs" />
+        </button>
+        {dropdownOpen && (
+          <UserDropdown onClose={() => setDropdownOpen(false)} />
+        )}
       </div>
     </div>
   );
