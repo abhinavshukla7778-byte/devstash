@@ -1,27 +1,12 @@
-# Current Feature: Item Create
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add "New Item" button in top bar that opens a shadcn Dialog
-- Type selector in the dialog (snippet, prompt, command, note, link)
-- Show fields based on selected type:
-  - All types: title (required), description, tags
-  - snippet/command: content + language
-  - prompt/note: content
-  - link: URL (required)
-- Server action `createItem` with Zod validation
-- Query function `createItem` in `lib/db/items.ts`
-- Toast on success, close modal and refresh list
-
 ## Notes
-
-- Use shadcn Dialog component (not Sheet)
-- URL is required for link type, title is required for all types
-- Follow existing patterns from `updateItem` server action and `src/actions/items.ts`
 
 ## History
 
@@ -43,3 +28,4 @@ In Progress
 - 2026-04-10: Completed Item Drawer — shadcn Sheet drawer opens on item card click (dashboard + items list), fetches full detail via /api/items/[id] with auth check, skeleton loading state, action bar (Favorite/Pin/Copy/Edit/Delete), shows description, content, tags, collections, and created/updated dates
 - 2026-04-10: Completed Item Drawer Edit Mode — inline edit mode in the drawer (same Sheet), controlled inputs for title/description/tags plus type-specific fields (content, language, URL), Zod-validated server action in src/actions/items.ts, updateItem DB query with tag disconnect+connect-or-create, sonner toast on save/error, router.refresh() after save
 - 2026-04-10: Completed Delete Item — Trash2 button in item drawer opens ShadCN AlertDialog for confirmation, deleteItem server action with ownership check, sonner toast on success, drawer closes and list refreshes after deletion
+- 2026-04-10: Completed Item Create — "New Item" button in top bar opens a Dialog with type selector (snippet, prompt, command, note, link), dynamic fields per type (content/language for snippet/command, content for prompt/note, URL for link), createItem server action with Zod validation, sonner toast on success, modal closes and list refreshes
