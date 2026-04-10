@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Profile Page
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Create profile page at `/profile` route (protected, requires auth)
+- Display user info: email, name, avatar (GitHub or initials), account creation date
+- Show usage stats: total items, total collections, breakdown by item type
+- Add change password action (email/password users only, hidden for GitHub OAuth users)
+- Add delete account action with confirmation dialog
+
 ## Notes
+
+- Avatar: use GitHub avatar from OAuth if available, otherwise generate initials from name/email (reuse existing `UserAvatar` component)
+- Change password button only shown when user has no OAuth account (i.e., signed up with email/password)
+- Delete account requires a confirmation dialog to prevent accidental deletion
+- Item type breakdown should show counts per type: Snippet, Prompt, Note, Command, URL, File, Image
+- Follow existing data fetching patterns: server component with direct Prisma queries
 
 ## History
 
