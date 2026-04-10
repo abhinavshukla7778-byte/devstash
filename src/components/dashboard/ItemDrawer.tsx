@@ -10,11 +10,21 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { updateItem } from '@/actions/items';
+import { updateItem, deleteItem } from '@/actions/items';
 import type { ItemDetailData } from '@/lib/db/items';
 
 // Types that show the content textarea
@@ -97,6 +107,8 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [editMode, setEditMode] = useState(false);
   const [editState, setEditState] = useState<EditState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!itemId) {
@@ -175,6 +187,20 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     router.refresh();
   }
 
+  async function handleDelete() {
+    if (!item) return;
+    setDeleting(true);
+    const result = await deleteItem(item.id);
+    setDeleting(false);
+    if (!result.success) {
+      toast.error(result.error ?? 'Failed to delete item');
+      return;
+    }
+    toast.success('Item deleted');
+    onClose();
+    router.refresh();
+  }
+
   function setField<K extends keyof EditState>(key: K, value: EditState[K]) {
     setEditState((prev) => prev ? { ...prev, [key]: value } : prev);
   }
@@ -185,6 +211,7 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const showUrl = URL_TYPES.has(typeLower);
 
   return (
+    <>
     <Sheet open={!!itemId} onOpenChange={(open) => { if (!open) onClose(); }}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
         {loading && (
@@ -255,7 +282,12 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                   <Pencil className="w-3.5 h-3.5" />
                   Edit
                 </Button>
-                <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-destructive hover:text-destructive">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-xs text-destructive hover:text-destructive"
+                  onClick={() => setConfirmDelete(true)}
+                >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               </div>
@@ -487,5 +519,27 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
         )}
       </SheetContent>
     </Sheet>
+
+    <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete item?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete &ldquo;{item?.title}&rdquo;. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={deleting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {deleting ? 'Deleting…' : 'Delete'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
