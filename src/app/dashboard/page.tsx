@@ -1,6 +1,6 @@
 import StatsCards from '@/components/dashboard/StatsCards';
 import CollectionsGrid from '@/components/dashboard/CollectionsGrid';
-import ItemList from '@/components/dashboard/ItemList';
+import DashboardItems from '@/components/dashboard/DashboardItems';
 import { getRecentCollections, getDashboardStats } from '@/lib/db/collections';
 import { getPinnedItems, getRecentItems } from '@/lib/db/items';
 
@@ -30,9 +30,7 @@ export default async function DashboardPage() {
 
       <CollectionsGrid collections={collections} />
 
-      <ItemList title="Pinned" items={pinnedItems} />
-
-      <ItemList title="Recent Items" items={recentItems} />
+      <DashboardItems pinnedItems={pinnedItems} recentItems={recentItems} />
     </div>
   );
 }

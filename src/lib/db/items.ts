@@ -6,6 +6,7 @@ const DEFAULT_COLOR = '#3b82f6';
 export interface ItemCardData {
   id: string;
   title: string;
+  content: string | null;
   description: string | null;
   isFavorite: boolean;
   isPinned: boolean;
@@ -19,6 +20,7 @@ export interface ItemCardData {
 function mapItem(item: {
   id: string;
   title: string;
+  content: string | null;
   description: string | null;
   isFavorite: boolean;
   isPinned: boolean;
@@ -29,6 +31,7 @@ function mapItem(item: {
   return {
     id: item.id,
     title: item.title,
+    content: item.content,
     description: item.description,
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
@@ -86,4 +89,81 @@ export async function getRecentItems(limit = 10): Promise<ItemCardData[]> {
     take: limit,
   });
   return items.map(mapItem);
+}
+
+export interface ItemDetailData {
+  id: string;
+  title: string;
+  content: string | null;
+  description: string | null;
+  url: string | null;
+  language: string | null;
+  contentType: string;
+  isFavorite: boolean;
+  isPinned: boolean;
+  tags: string[];
+  collections: { id: string; name: string }[];
+  createdAt: Date;
+  updatedAt: Date;
+  typeIcon: string;
+  typeColor: string;
+  typeName: string;
+}
+
+export async function getItemById(id: string): Promise<ItemDetailData | null> {
+  const item = await prisma.item.findUnique({
+    where: { id },
+    include: {
+      type: true,
+      tags: { include: { tag: true } },
+      collections: { include: { collection: true } },
+    },
+  });
+
+  if (!item) return null;
+
+  return {
+    id: item.id,
+    title: item.title,
+    content: item.content,
+    description: item.description,
+    url: item.url,
+    language: item.language,
+    contentType: item.contentType,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    tags: item.tags.map((t) => t.tag.name),
+    collections: item.collections.map((c) => ({
+      id: c.collection.id,
+      name: c.collection.name,
+    })),
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    typeIcon: item.type.icon ?? DEFAULT_ICON,
+    typeColor: item.type.color ?? DEFAULT_COLOR,
+    typeName: item.type.name,
+  };
+}
+
+export async function getItemsByType(typeName: string): Promise<{ items: ItemCardData[]; typeColor: string; typeName: string } | null> {
+  const type = await prisma.itemType.findFirst({
+    where: { name: typeName, isSystem: true },
+  });
+
+  if (!type) return null;
+
+  const items = await prisma.item.findMany({
+    where: { typeId: type.id },
+    include: {
+      type: true,
+      tags: { include: { tag: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return {
+    items: items.map(mapItem),
+    typeColor: type.color ?? DEFAULT_COLOR,
+    typeName: type.name,
+  };
 }
