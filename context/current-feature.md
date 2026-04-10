@@ -1,12 +1,27 @@
-# Current Feature
+# Current Feature: Item Create
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add "New Item" button in top bar that opens a shadcn Dialog
+- Type selector in the dialog (snippet, prompt, command, note, link)
+- Show fields based on selected type:
+  - All types: title (required), description, tags
+  - snippet/command: content + language
+  - prompt/note: content
+  - link: URL (required)
+- Server action `createItem` with Zod validation
+- Query function `createItem` in `lib/db/items.ts`
+- Toast on success, close modal and refresh list
+
 ## Notes
+
+- Use shadcn Dialog component (not Sheet)
+- URL is required for link type, title is required for all types
+- Follow existing patterns from `updateItem` server action and `src/actions/items.ts`
 
 ## History
 
