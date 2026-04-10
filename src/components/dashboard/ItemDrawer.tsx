@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Code, Sparkles, Terminal, StickyNote, File, Image, Link, Star, Pin, Copy, Pencil, Trash2 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Star, Pin, Copy, Pencil, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Sheet,
   SheetContent,
@@ -11,21 +12,30 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { updateItem } from '@/actions/items';
 import type { ItemDetailData } from '@/lib/db/items';
 
-const ICON_MAP: Record<string, LucideIcon> = {
-  Code,
-  Sparkles,
-  Terminal,
-  StickyNote,
-  File,
-  Image,
-  Link,
-};
+// Types that show the content textarea
+const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note']);
+// Types that show the language field
+const LANGUAGE_TYPES = new Set(['snippet', 'command']);
+// Types that show the URL field
+const URL_TYPES = new Set(['url', 'link']);
 
 interface ItemDrawerProps {
   itemId: string | null;
   onClose: () => void;
+}
+
+interface EditState {
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  language: string;
+  tags: string; // comma-separated
 }
 
 function formatDate(value: Date | string): string {
@@ -69,19 +79,38 @@ function DrawerSkeleton() {
   );
 }
 
+function buildEditState(item: ItemDetailData): EditState {
+  return {
+    title: item.title,
+    description: item.description ?? '',
+    content: item.content ?? '',
+    url: item.url ?? '',
+    language: item.language ?? '',
+    tags: item.tags.join(', '),
+  };
+}
+
 export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
+  const router = useRouter();
   const [item, setItem] = useState<ItemDetailData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editState, setEditState] = useState<EditState | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!itemId) {
       setItem(null);
+      setEditMode(false);
+      setEditState(null);
       return;
     }
 
     let cancelled = false;
     setLoading(true);
     setItem(null);
+    setEditMode(false);
+    setEditState(null);
 
     fetch(`/api/items/${itemId}`)
       .then((res) => res.json())
@@ -100,7 +129,60 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     };
   }, [itemId]);
 
-  const Icon = item ? (ICON_MAP[item.typeIcon] ?? Code) : Code;
+  function handleEditClick() {
+    if (!item) return;
+    setEditState(buildEditState(item));
+    setEditMode(true);
+  }
+
+  function handleCancel() {
+    setEditMode(false);
+    setEditState(null);
+  }
+
+  async function handleSave() {
+    if (!item || !editState) return;
+    setSaving(true);
+
+    const tags = editState.tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const result = await updateItem(item.id, {
+      title: editState.title,
+      description: editState.description || null,
+      content: editState.content || null,
+      url: editState.url || null,
+      language: editState.language || null,
+      tags,
+    });
+
+    setSaving(false);
+
+    if (!result.success) {
+      const msg = typeof result.error === 'string'
+        ? result.error
+        : 'Failed to save changes';
+      toast.error(msg);
+      return;
+    }
+
+    setItem(result.data!);
+    setEditMode(false);
+    setEditState(null);
+    toast.success('Item updated');
+    router.refresh();
+  }
+
+  function setField<K extends keyof EditState>(key: K, value: EditState[K]) {
+    setEditState((prev) => prev ? { ...prev, [key]: value } : prev);
+  }
+
+  const typeLower = item?.typeName?.toLowerCase() ?? '';
+  const showContent = CONTENT_TYPES.has(typeLower);
+  const showLanguage = LANGUAGE_TYPES.has(typeLower);
+  const showUrl = URL_TYPES.has(typeLower);
 
   return (
     <Sheet open={!!itemId} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -116,9 +198,9 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
           </>
         )}
 
-        {!loading && item && (
+        {!loading && item && !editMode && (
           <>
-            {/* Header */}
+            {/* Header — view mode */}
             <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
               <SheetTitle className="text-left text-base font-semibold leading-snug pr-8">
                 {item.title}
@@ -138,7 +220,7 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
               </div>
             </SheetHeader>
 
-            {/* Action bar */}
+            {/* Action bar — view mode */}
             <div className="flex items-center gap-1 px-6 py-3 border-b border-border">
               <Button
                 variant="ghost"
@@ -164,7 +246,12 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 </Button>
               )}
               <div className="ml-auto flex items-center gap-1">
-                <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={handleEditClick}
+                >
                   <Pencil className="w-3.5 h-3.5" />
                   Edit
                 </Button>
@@ -174,9 +261,8 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
               </div>
             </div>
 
-            {/* Body */}
+            {/* Body — view mode */}
             <div className="px-6 py-4 space-y-5">
-              {/* Description */}
               {item.description && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1.5">Description</p>
@@ -184,7 +270,6 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 </div>
               )}
 
-              {/* Content */}
               {item.content && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1.5">Content</p>
@@ -194,7 +279,6 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 </div>
               )}
 
-              {/* URL */}
               {item.url && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1.5">URL</p>
@@ -209,7 +293,6 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 </div>
               )}
 
-              {/* Tags */}
               {item.tags.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1.5">Tags</p>
@@ -226,7 +309,6 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 </div>
               )}
 
-              {/* Collections */}
               {item.collections.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1.5">Collections</p>
@@ -243,7 +325,150 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 </div>
               )}
 
-              {/* Details */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1.5">Details</p>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Created</span>
+                    <span>{formatDate(item.createdAt)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Updated</span>
+                    <span>{formatDate(item.updatedAt)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {!loading && item && editMode && editState && (
+          <>
+            {/* Header — edit mode */}
+            <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span
+                  className="px-2 py-0.5 text-xs rounded-full font-medium"
+                  style={{ backgroundColor: `${item.typeColor}20`, color: item.typeColor }}
+                >
+                  {item.typeName}
+                </span>
+              </div>
+              <SheetTitle className="sr-only">Edit {item.typeName}</SheetTitle>
+            </SheetHeader>
+
+            {/* Action bar — edit mode */}
+            <div className="flex items-center gap-2 px-6 py-3 border-b border-border">
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={saving || !editState.title.trim()}
+                className="text-xs"
+              >
+                {saving ? 'Saving…' : 'Save'}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCancel}
+                disabled={saving}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+            </div>
+
+            {/* Body — edit mode */}
+            <div className="px-6 py-4 space-y-4">
+              {/* Title */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                  Title <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  value={editState.title}
+                  onChange={(e) => setField('title', e.target.value)}
+                  placeholder="Title"
+                  className="text-sm"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                  Description
+                </label>
+                <Textarea
+                  value={editState.description}
+                  onChange={(e) => setField('description', e.target.value)}
+                  placeholder="Optional description"
+                  rows={2}
+                  className="text-sm resize-none"
+                />
+              </div>
+
+              {/* Content — snippet, prompt, command, note */}
+              {showContent && (
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                    Content
+                  </label>
+                  <Textarea
+                    value={editState.content}
+                    onChange={(e) => setField('content', e.target.value)}
+                    placeholder="Content"
+                    rows={6}
+                    className="text-sm font-mono resize-y"
+                  />
+                </div>
+              )}
+
+              {/* Language — snippet, command */}
+              {showLanguage && (
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                    Language
+                  </label>
+                  <Input
+                    value={editState.language}
+                    onChange={(e) => setField('language', e.target.value)}
+                    placeholder="e.g. typescript, bash"
+                    className="text-sm"
+                  />
+                </div>
+              )}
+
+              {/* URL — link */}
+              {showUrl && (
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                    URL
+                  </label>
+                  <Input
+                    value={editState.url}
+                    onChange={(e) => setField('url', e.target.value)}
+                    placeholder="https://..."
+                    className="text-sm"
+                    type="url"
+                  />
+                </div>
+              )}
+
+              {/* Tags */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                  Tags
+                </label>
+                <Input
+                  value={editState.tags}
+                  onChange={(e) => setField('tags', e.target.value)}
+                  placeholder="react, hooks, typescript"
+                  className="text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">Comma-separated</p>
+              </div>
+
+              {/* Non-editable details */}
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1.5">Details</p>
                 <div className="space-y-1">
