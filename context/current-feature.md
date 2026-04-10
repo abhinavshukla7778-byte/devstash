@@ -1,27 +1,12 @@
-# Current Feature: Item Drawer
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Use shadcn Sheet component opening from the right
-- Clicking an ItemCard opens the drawer with that item's full data
-- Works on both dashboard and items list pages
-- Action bar with Favorite (star, yellow when active), Pin, Copy, Edit (pencil), and Delete (trash, right-aligned)
-- Client wrapper component to manage drawer state (pages are server components)
-- Fetch full item detail on click via `/api/items/[id]` API route
-- Show skeleton/loading state while fetching
-- Query function in `lib/db/items.ts`, API route calls it with auth check
-
 ## Notes
-
-- No separate item page — drawer is the item detail view
-- Card data already fetched by server component; only full detail is fetched on click
-- Focus on drawer details display only — code editor and item-specific extras come later
-- Reference screenshot: `context/screenshots/dashboard-ui-drawer.png`
-- Should feel snappy — no page navigation
 
 ## History
 
@@ -40,3 +25,4 @@ In Progress
 - 2026-04-10: Completed Auth UI — Custom /sign-in and /register pages, reusable UserAvatar component (GitHub image or initials), real user in sidebar with sign-out dropdown
 - 2026-04-10: Completed Profile Page — /profile route with user info (avatar, name, email, member-since), usage stats (total items, collections, per-type breakdown), change password dialog (email users only), and delete account dialog with confirmation
 - 2026-04-10: Completed Items List View — dynamic /items/[type] route, server component with Prisma fetch, responsive two-column grid of ItemCards filtered by type, type-colored left border
+- 2026-04-10: Completed Item Drawer — shadcn Sheet drawer opens on item card click (dashboard + items list), fetches full detail via /api/items/[id] with auth check, skeleton loading state, action bar (Favorite/Pin/Copy/Edit/Delete), shows description, content, tags, collections, and created/updated dates
