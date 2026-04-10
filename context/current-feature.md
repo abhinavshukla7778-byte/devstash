@@ -1,24 +1,12 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create profile page at `/profile` route (protected, requires auth)
-- Display user info: email, name, avatar (GitHub or initials), account creation date
-- Show usage stats: total items, total collections, breakdown by item type
-- Add change password action (email/password users only, hidden for GitHub OAuth users)
-- Add delete account action with confirmation dialog
-
 ## Notes
-
-- Avatar: use GitHub avatar from OAuth if available, otherwise generate initials from name/email (reuse existing `UserAvatar` component)
-- Change password button only shown when user has no OAuth account (i.e., signed up with email/password)
-- Delete account requires a confirmation dialog to prevent accidental deletion
-- Item type breakdown should show counts per type: Snippet, Prompt, Note, Command, URL, File, Image
-- Follow existing data fetching patterns: server component with direct Prisma queries
 
 ## History
 
@@ -35,3 +23,4 @@ In Progress
 - 2026-04-10: Completed Auth Setup — NextAuth v5 GitHub OAuth with split config pattern, Prisma adapter, JWT sessions, proxy.ts route protection for /dashboard/*, and postinstall patch for next-auth beta.30 iss parameter bug
 - 2026-04-10: Completed Auth Credentials — Email/password Credentials provider with bcrypt validation, POST /api/auth/register route for user registration
 - 2026-04-10: Completed Auth UI — Custom /sign-in and /register pages, reusable UserAvatar component (GitHub image or initials), real user in sidebar with sign-out dropdown
+- 2026-04-10: Completed Profile Page — /profile route with user info (avatar, name, email, member-since), usage stats (total items, collections, per-type breakdown), change password dialog (email users only), and delete account dialog with confirmation
