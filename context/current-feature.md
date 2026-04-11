@@ -1,24 +1,12 @@
-# Current Feature: Collections Pages
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create `/collections` page that lists all of the user's collections using the existing collection cards
-- Create `/collections/[id]` page that shows the items inside a specific collection using existing item cards
-- Link the "View all collections" text in the sidebar to `/collections`
-- Link each collection card (on dashboard and collections page) to `/collections/[id]`
-
 ## Notes
-
-- Reuse existing `CollectionCard` component for the collections grid
-- Reuse existing `ItemCard` component for the items grid inside a collection
-- Both pages are server components — fetch data directly with Prisma
-- Auth-guard: only show the authenticated user's data
-- The `/collections/[id]` page should show the collection name, description, and a grid of its items
-- If a collection has no items, show an empty state
 
 ## History
 
@@ -43,3 +31,4 @@ In Progress
 - 2026-04-10: Completed Item Create — "New Item" button in top bar opens a Dialog with type selector (snippet, prompt, command, note, link), dynamic fields per type (content/language for snippet/command, content for prompt/note, URL for link), createItem server action with Zod validation, sonner toast on success, modal closes and list refreshes
 - 2026-04-11: Completed Collection Create — "New Collection" button in top bar opens a Dialog with name (required) and description (optional) fields, createCollection server action with Zod validation and user-scoped DB function, sonner toast on success/error, modal closes and page refreshes; empty collections show no color border or type icons on card/sidebar
 - 2026-04-11: Completed Add Item to Collections — multi-select CollectionSelector component added to New Item dialog and Item Drawer edit mode; fetches user-scoped collections via getUserCollections server action; wires assignments through createItem and updateItem server actions into CollectionItem join table using deleteMany + createMany sync on update
+- 2026-04-11: Completed Collections Pages — /collections page lists all user collections; /collections/[id] shows items in a specific collection with mixed-type per-item colors; collection cards on dashboard and /collections link to their /collections/[id] page; "View all" button and sidebar link both point to /collections
