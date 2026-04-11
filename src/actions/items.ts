@@ -18,6 +18,7 @@ const CreateItemSchema = z.object({
   url: z.string().trim().nullable().optional(),
   language: z.string().trim().nullable().optional(),
   tags: z.array(z.string().trim().min(1)).default([]),
+  collectionIds: z.array(z.string()).default([]),
 }).superRefine((data, ctx) => {
   if (URL_TYPES.has(data.typeName) && !data.url?.trim()) {
     ctx.addIssue({ code: 'custom', message: 'URL is required', path: ['url'] });
@@ -50,7 +51,7 @@ export async function createItem(input: CreateItemInput): Promise<CreateItemResu
     return { success: false, error: parsed.error.flatten().fieldErrors };
   }
 
-  const { typeName, title, description, content, url, language, tags } = parsed.data;
+  const { typeName, title, description, content, url, language, tags, collectionIds } = parsed.data;
 
   const showContent = CONTENT_TYPES.has(typeName);
   const showLanguage = LANGUAGE_TYPES.has(typeName);
@@ -65,6 +66,7 @@ export async function createItem(input: CreateItemInput): Promise<CreateItemResu
       url: showUrl ? (url ?? null) : null,
       language: showLanguage ? (language ?? null) : null,
       tags,
+      collectionIds,
     });
     return { success: true, data: item };
   } catch {
@@ -103,6 +105,7 @@ const UpdateItemSchema = z.object({
   url: z.string().trim().url('Must be a valid URL').nullable().optional(),
   language: z.string().trim().nullable().optional(),
   tags: z.array(z.string().trim().min(1)).default([]),
+  collectionIds: z.array(z.string()).default([]),
 });
 
 type UpdateItemInput = z.infer<typeof UpdateItemSchema>;
@@ -136,7 +139,7 @@ export async function updateItem(
     return { success: false, error: 'Not found' };
   }
 
-  const { title, description, content, url, language, tags } = parsed.data;
+  const { title, description, content, url, language, tags, collectionIds } = parsed.data;
 
   const updated = await dbUpdateItem(itemId, session.user.id, {
     title,
@@ -145,6 +148,7 @@ export async function updateItem(
     url: url ?? null,
     language: language ?? null,
     tags,
+    collectionIds,
   });
 
   return { success: true, data: updated };

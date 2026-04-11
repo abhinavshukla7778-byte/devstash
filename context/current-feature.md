@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Add Item to Collections
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add a multi-select collection input to the "New Item" dialog so users can assign a new item to one or more collections at creation time
+- Add the same multi-select collection input to the "Edit Item" form in the item drawer so users can change collection membership
+- Fetch the current user's collections in both contexts and populate the selector
+- Wire collection assignments into the `createItem` and `updateItem` server actions — use the existing `CollectionItem` join table
+- Show selected collection names as tags/chips in the input for clarity
+- Do not implement collection detail/browse pages
+
 ## Notes
+
+- The schema uses a `CollectionItem` join table (many-to-many between `Item` and `Collection`), not a direct `collectionId` on `Item` — handle connect/disconnect accordingly
+- Collections are user-scoped; only fetch collections belonging to the authenticated user
+- The selector should support zero, one, or many collections selected
+- Follow the same pattern used for tags (disconnect + connect-or-create) when updating collections on edit
 
 ## History
 

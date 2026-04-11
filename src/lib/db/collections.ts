@@ -153,6 +153,20 @@ export async function createCollection(
   };
 }
 
+export interface UserCollection {
+  id: string;
+  name: string;
+}
+
+export async function getUserCollections(userId: string): Promise<UserCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  });
+  return collections;
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count(),

@@ -155,9 +155,11 @@ export async function updateItem(
     url: string | null;
     language: string | null;
     tags: string[];
+    collectionIds: string[];
   }
 ): Promise<ItemDetailData> {
   // Disconnect all existing tags then connect-or-create new ones
+  // Disconnect all existing collections then reconnect selected ones
   const item = await prisma.item.update({
     where: { id },
     data: {
@@ -177,6 +179,12 @@ export async function updateItem(
             },
           },
         })),
+      },
+      collections: {
+        deleteMany: {},
+        createMany: {
+          data: data.collectionIds.map((collectionId) => ({ collectionId })),
+        },
       },
     },
     include: {
@@ -219,6 +227,7 @@ export async function createItem(
     url: string | null;
     language: string | null;
     tags: string[];
+    collectionIds: string[];
   }
 ): Promise<ItemDetailData> {
   const type = await prisma.itemType.findFirst({
@@ -245,6 +254,11 @@ export async function createItem(
             },
           },
         })),
+      },
+      collections: {
+        createMany: {
+          data: data.collectionIds.map((collectionId) => ({ collectionId })),
+        },
       },
     },
     include: {
