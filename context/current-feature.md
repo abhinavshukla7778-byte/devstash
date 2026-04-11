@@ -1,24 +1,12 @@
-# Current Feature: Add Item to Collections
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add a multi-select collection input to the "New Item" dialog so users can assign a new item to one or more collections at creation time
-- Add the same multi-select collection input to the "Edit Item" form in the item drawer so users can change collection membership
-- Fetch the current user's collections in both contexts and populate the selector
-- Wire collection assignments into the `createItem` and `updateItem` server actions — use the existing `CollectionItem` join table
-- Show selected collection names as tags/chips in the input for clarity
-- Do not implement collection detail/browse pages
-
 ## Notes
-
-- The schema uses a `CollectionItem` join table (many-to-many between `Item` and `Collection`), not a direct `collectionId` on `Item` — handle connect/disconnect accordingly
-- Collections are user-scoped; only fetch collections belonging to the authenticated user
-- The selector should support zero, one, or many collections selected
-- Follow the same pattern used for tags (disconnect + connect-or-create) when updating collections on edit
 
 ## History
 
@@ -42,3 +30,4 @@ In Progress
 - 2026-04-10: Completed Delete Item — Trash2 button in item drawer opens ShadCN AlertDialog for confirmation, deleteItem server action with ownership check, sonner toast on success, drawer closes and list refreshes after deletion
 - 2026-04-10: Completed Item Create — "New Item" button in top bar opens a Dialog with type selector (snippet, prompt, command, note, link), dynamic fields per type (content/language for snippet/command, content for prompt/note, URL for link), createItem server action with Zod validation, sonner toast on success, modal closes and list refreshes
 - 2026-04-11: Completed Collection Create — "New Collection" button in top bar opens a Dialog with name (required) and description (optional) fields, createCollection server action with Zod validation and user-scoped DB function, sonner toast on success/error, modal closes and page refreshes; empty collections show no color border or type icons on card/sidebar
+- 2026-04-11: Completed Add Item to Collections — multi-select CollectionSelector component added to New Item dialog and Item Drawer edit mode; fetches user-scoped collections via getUserCollections server action; wires assignments through createItem and updateItem server actions into CollectionItem join table using deleteMany + createMany sync on update
