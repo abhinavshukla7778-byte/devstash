@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Collection Actions
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add Edit, Delete, and Favorite action buttons to the `/collections/[id]` page header
+- Favorite button is UI-only (no functionality yet, just the icon/button)
+- Edit button opens a modal to edit collection name and description
+- Delete button opens a confirmation dialog; on confirm, removes items from the collection (via CollectionItem join table) but does NOT delete the items themselves, then deletes the collection
+- On collection cards at `/collections` and dashboard, replace any existing card click behavior: clicking anywhere on the card navigates to `/collections/[id]`, but a 3-dots (MoreHorizontal) menu icon shows a dropdown with Edit, Delete, and Favorite options
+- Favorite option in the dropdown is UI-only for now
+
 ## Notes
+
+- Items are linked via CollectionItem join table — removing from collection means deleting CollectionItem records, not Item records
+- Edit modal fields: name (required), description (optional) — same as collection create
+- Delete confirmation should warn that items will be unlinked but not deleted
+- The 3-dots dropdown must stop event propagation so it doesn't trigger the card navigation click
 
 ## History
 
