@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { updateItem, deleteItem } from '@/actions/items';
+import { updateItem, deleteItem, toggleItemFavorite } from '@/actions/items';
 import { getUserCollections } from '@/actions/collections';
 import CollectionSelector from '@/components/ui/CollectionSelector';
 import type { ItemDetailData } from '@/lib/db/items';
@@ -119,6 +119,7 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
 
   useEffect(() => {
     if (!itemId) {
@@ -215,6 +216,22 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     router.refresh();
   }
 
+  async function handleFavoriteToggle() {
+    if (!item || togglingFavorite) return;
+    setTogglingFavorite(true);
+    const prevFavorite = item.isFavorite;
+    setItem((prev) => prev ? { ...prev, isFavorite: !prev.isFavorite } : prev);
+    const result = await toggleItemFavorite(item.id);
+    setTogglingFavorite(false);
+    if (!result.success) {
+      setItem((prev) => prev ? { ...prev, isFavorite: prevFavorite } : prev);
+      toast.error(result.error ?? 'Failed to update favorite');
+      return;
+    }
+    toast.success(result.isFavorite ? 'Added to favorites' : 'Removed from favorites');
+    router.refresh();
+  }
+
   function setField<K extends keyof EditState>(key: K, value: EditState[K]) {
     setEditState((prev) => prev ? { ...prev, [key]: value } : prev);
   }
@@ -267,6 +284,8 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 variant="ghost"
                 size="sm"
                 className={`gap-1.5 text-xs ${item.isFavorite ? 'text-yellow-500' : ''}`}
+                onClick={handleFavoriteToggle}
+                disabled={togglingFavorite}
               >
                 <Star className={`w-3.5 h-3.5 ${item.isFavorite ? 'fill-yellow-500 text-yellow-500' : ''}`} />
                 Favorite

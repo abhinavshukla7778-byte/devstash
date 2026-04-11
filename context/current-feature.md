@@ -1,12 +1,26 @@
-# Current Feature
+# Current Feature: Favorite Toggle (Drawer, Collection Page, Cards)
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Wire up the Favorite button in the Item Drawer action bar to actually toggle `isFavorite` on the item in the DB and reflect the new state immediately
+- Wire up the Favorite button in the Collection page (/collections/[id] header) to toggle `isFavorite` on the collection in the DB
+- Wire up the Favorite option in the 3-dots dropdown on collection cards (/collections and dashboard) to toggle `isFavorite` on the collection in the DB
+- Show active/filled star vs outline star to indicate current favorite state in all three locations
+- Refresh or optimistically update UI after toggle so the star reflects the new state without a full reload
+
 ## Notes
+
+- Item `isFavorite` and Collection `isFavorite` fields already exist in the Prisma schema
+- The Favorites Page (/favorites) already uses `getFavoriteItems` and `getFavoriteCollections` — toggling should make items/collections appear/disappear from that page on next visit
+- The Item Drawer already loads full item detail via `/api/items/[id]` — use the returned `isFavorite` field to set initial star state
+- Collection page already has Favorite button in header (currently UI-only)
+- Collection cards already have Favorite in 3-dots dropdown (currently UI-only)
+- Use Server Actions for the toggle mutations (consistent with existing patterns)
+- Show sonner toast on toggle success/error
 
 ## History
 
