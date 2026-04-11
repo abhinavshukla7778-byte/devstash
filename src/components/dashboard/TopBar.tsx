@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, FolderPlus, PanelLeft } from "lucide-react";
+import { Search, PanelLeft } from "lucide-react";
 import CreateItemDialog from "@/components/dashboard/CreateItemDialog";
+import CreateCollectionDialog from "@/components/dashboard/CreateCollectionDialog";
 
 interface TopBarProps {
   onToggleSidebar?: () => void;
@@ -36,10 +36,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <FolderPlus className="w-4 h-4" />
-          New Collection
-        </Button>
+        <CreateCollectionDialog />
         <CreateItemDialog />
       </div>
     </header>

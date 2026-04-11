@@ -15,7 +15,7 @@ export interface CollectionCardData {
   isFavorite: boolean;
   itemCount: number;
   updatedAt: Date;
-  dominantColor: string;
+  dominantColor: string | null;
   typeIcons: CollectionTypeIcon[];
 }
 
@@ -60,12 +60,9 @@ export async function getRecentCollections(limit = 6): Promise<CollectionCardDat
 
     const typeEntries = Object.values(typeCounts).sort((a, b) => b.count - a.count);
 
-    const dominantColor = typeEntries[0]?.color ?? DEFAULT_COLOR;
+    const dominantColor = typeEntries[0]?.color ?? null;
 
-    const typeIcons: CollectionTypeIcon[] =
-      typeEntries.length > 0
-        ? typeEntries.map(({ icon, color }) => ({ icon, color }))
-        : [{ icon: DEFAULT_ICON, color: DEFAULT_COLOR }];
+    const typeIcons: CollectionTypeIcon[] = typeEntries.map(({ icon, color }) => ({ icon, color }));
 
     return {
       id: collection.id,
@@ -84,7 +81,7 @@ export interface SidebarCollection {
   id: string;
   name: string;
   isFavorite: boolean;
-  dominantColor: string;
+  dominantColor: string | null;
 }
 
 export async function getSidebarCollections(): Promise<SidebarCollection[]> {
@@ -114,7 +111,7 @@ export async function getSidebarCollections(): Promise<SidebarCollection[]> {
     }
 
     const sorted = Object.values(typeCounts).sort((a, b) => b.count - a.count);
-    const dominantColor = sorted[0]?.color ?? DEFAULT_COLOR;
+    const dominantColor = sorted[0]?.color ?? null;
 
     return {
       id: collection.id,
@@ -123,6 +120,37 @@ export async function getSidebarCollections(): Promise<SidebarCollection[]> {
       dominantColor,
     };
   });
+}
+
+export interface CollectionData {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export async function createCollection(
+  userId: string,
+  data: { name: string; description: string | null }
+): Promise<CollectionData> {
+  const collection = await prisma.collection.create({
+    data: {
+      name: data.name,
+      description: data.description,
+      userId,
+    },
+  });
+
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    createdAt: collection.createdAt,
+    updatedAt: collection.updatedAt,
+  };
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
