@@ -6,7 +6,11 @@ const { auth } = NextAuth(authConfig)
 export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
   const isProtected =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/profile");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/favorites") ||
+    pathname.startsWith("/items") ||
+    pathname.startsWith("/collections");
   if (!req.auth && isProtected) {
     const signInUrl = new URL("/sign-in", req.nextUrl.origin)
     signInUrl.searchParams.set("callbackUrl", req.nextUrl.pathname + req.nextUrl.search)

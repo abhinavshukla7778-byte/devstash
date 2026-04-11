@@ -332,6 +332,27 @@ export async function deleteCollection(
   });
 }
 
+export interface FavoriteCollectionData {
+  id: string;
+  name: string;
+  itemCount: number;
+  updatedAt: Date;
+}
+
+export async function getFavoriteCollections(userId: string): Promise<FavoriteCollectionData[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    include: { _count: { select: { items: true } } },
+    orderBy: { updatedAt: 'desc' },
+  });
+  return collections.map((col) => ({
+    id: col.id,
+    name: col.name,
+    itemCount: col._count.items,
+    updatedAt: col.updatedAt,
+  }));
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count(),
