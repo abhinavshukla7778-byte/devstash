@@ -1,26 +1,12 @@
-# Current Feature: Implement Collection Create
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add a "New Collection" button in the top bar (alongside the existing "New Item" button)
-- Clicking the button opens a modal dialog with fields: name (required) and description (optional)
-- Implement a `createCollection` server action in `src/actions/collections.ts` with Zod validation
-- Add a `createCollection` DB function in `src/lib/db/collections.ts` (user-scoped)
-- Show a sonner toast on success or failure
-- Close the modal and refresh the page/list after successful creation
-- Follow the same patterns as item create (Dialog, server action, Zod, toast, router.refresh)
-
 ## Notes
-
-- Collections are user-scoped — always filter/create by authenticated user's ID
-- Follow existing patterns: server components fetch via lib/db functions, client-side mutations via server actions
-- The modal should use ShadCN Dialog component
-- Validate inputs with Zod before hitting the DB
-- Keep the create button consistent with the "New Item" button styling in the top bar
 
 ## History
 
@@ -43,3 +29,4 @@ In Progress
 - 2026-04-10: Completed Item Drawer Edit Mode — inline edit mode in the drawer (same Sheet), controlled inputs for title/description/tags plus type-specific fields (content, language, URL), Zod-validated server action in src/actions/items.ts, updateItem DB query with tag disconnect+connect-or-create, sonner toast on save/error, router.refresh() after save
 - 2026-04-10: Completed Delete Item — Trash2 button in item drawer opens ShadCN AlertDialog for confirmation, deleteItem server action with ownership check, sonner toast on success, drawer closes and list refreshes after deletion
 - 2026-04-10: Completed Item Create — "New Item" button in top bar opens a Dialog with type selector (snippet, prompt, command, note, link), dynamic fields per type (content/language for snippet/command, content for prompt/note, URL for link), createItem server action with Zod validation, sonner toast on success, modal closes and list refreshes
+- 2026-04-11: Completed Collection Create — "New Collection" button in top bar opens a Dialog with name (required) and description (optional) fields, createCollection server action with Zod validation and user-scoped DB function, sonner toast on success/error, modal closes and page refreshes; empty collections show no color border or type icons on card/sidebar
