@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Search, PanelLeft } from "lucide-react";
+import { Search, PanelLeft, Star } from "lucide-react";
 import CreateItemDialog from "@/components/dashboard/CreateItemDialog";
 import CreateCollectionDialog from "@/components/dashboard/CreateCollectionDialog";
 
@@ -39,6 +40,13 @@ export default function TopBar({ onToggleSidebar, onSearchClick }: TopBarProps) 
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        <Link
+          href="/favorites"
+          className="p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Favorites"
+        >
+          <Star className="w-4 h-4" />
+        </Link>
         <CreateCollectionDialog />
         <CreateItemDialog />
       </div>

@@ -1,24 +1,12 @@
-# Current Feature: Pagination
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add pagination to `/items/[type]` and `/collections/[id]` pages
-- Pagination controls at bottom with numbered page links and prev/next buttons
-- Disable (grey out) prev/next when not available
-- Use constants: `ITEMS_PER_PAGE = 21`, `COLLECTIONS_PER_PAGE = 21`
-- Dashboard limits: `DASHBOARD_COLLECTIONS_LIMIT = 6`, `DASHBOARD_RECENT_ITEMS_LIMIT = 10`
-- Only fetch the items needed for the current page (no fetching all records)
-
 ## Notes
-
-- Pagination is URL-based (query param `?page=N`) to support server-side fetching per page
-- `/items/[type]` paginates items filtered by type with `ITEMS_PER_PAGE = 21`
-- `/collections/[id]` paginates items in a collection with `COLLECTIONS_PER_PAGE = 21`
-- Dashboard collection grid and recent items continue to use their respective limits (not paginated)
 
 ## History
 
@@ -46,3 +34,5 @@ In Progress
 - 2026-04-11: Completed Collections Pages — /collections page lists all user collections; /collections/[id] shows items in a specific collection with mixed-type per-item colors; collection cards on dashboard and /collections link to their /collections/[id] page; "View all" button and sidebar link both point to /collections
 - 2026-04-11: Completed Collection Actions — Edit/Delete/Favorite buttons on /collections/[id] header; Edit opens modal to update name/description; Delete confirms then unlinks items (CollectionItem rows deleted, Items kept) and redirects to /collections; Favorite is UI-only; collection cards on /collections and dashboard now navigate on click with a 3-dots dropdown for Edit, Delete, and Favorite (UI-only)
 - 2026-04-11: Completed Global Search / Command Palette — Cmd+K/Ctrl+K opens a cmdk-powered command palette; client-side fuzzy search across all user items and collections; grouped results with type icons and collection item counts; item results open ItemDrawer inline, collection results navigate to /collections/[id]; TopBar search input opens palette on click with ⌘K badge hint; search data pre-fetched server-side in all three layouts
+- 2026-04-11: Completed Pagination — URL-based pagination (?page=N) on /items/[type] (21 items/page) and /collections/[id] (21 items/page); Pagination component with numbered links, ellipsis for large page counts, and greyed-out prev/next at boundaries; DB queries use skip/take to fetch only the current page; getCollectionWithItems uses _count for itemCount; constants file added for ITEMS_PER_PAGE, COLLECTIONS_PER_PAGE, DASHBOARD_COLLECTIONS_LIMIT, DASHBOARD_RECENT_ITEMS_LIMIT
+- 2026-04-11: Completed Favorites Page — /favorites route with compact terminal-style list (monospace, high density); separate Items and Collections sections with counts; each row shows type icon, title, type badge, date; click item opens ItemDrawer, click collection navigates to /collections/[id]; empty state; star icon in TopBar links to /favorites; getFavoriteItems/getFavoriteCollections DB functions user-scoped, sorted by updatedAt desc; route protection added for /favorites, /items, /collections in proxy

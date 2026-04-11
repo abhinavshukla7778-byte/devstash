@@ -291,6 +291,31 @@ export async function createItem(
   };
 }
 
+export interface FavoriteItemData {
+  id: string;
+  title: string;
+  typeIcon: string;
+  typeColor: string;
+  typeName: string;
+  updatedAt: Date;
+}
+
+export async function getFavoriteItems(userId: string): Promise<FavoriteItemData[]> {
+  const items = await prisma.item.findMany({
+    where: { userId, isFavorite: true },
+    include: { type: true },
+    orderBy: { updatedAt: 'desc' },
+  });
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    typeIcon: item.type.icon ?? DEFAULT_ICON,
+    typeColor: item.type.color ?? DEFAULT_COLOR,
+    typeName: item.type.name,
+    updatedAt: item.updatedAt,
+  }));
+}
+
 export async function getItemsByType(
   typeName: string,
   page: number,
