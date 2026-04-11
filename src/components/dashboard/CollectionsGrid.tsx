@@ -1,3 +1,4 @@
+import NextLink from 'next/link';
 import { Star, MoreHorizontal, Code, Sparkles, Terminal, StickyNote, File, Image, Link } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { CollectionCardData } from '@/lib/db/collections';
@@ -21,16 +22,17 @@ export default function CollectionsGrid({ collections }: CollectionsGridProps) {
     <section>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Collections</h2>
-        <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <NextLink href="/collections" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           View all
-        </button>
+        </NextLink>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {collections.map((collection) => {
           return (
-            <div
+            <NextLink
               key={collection.id}
-              className="bg-card border rounded-lg p-4 hover:opacity-90 cursor-pointer transition-opacity"
+              href={`/collections/${collection.id}`}
+              className="bg-card border rounded-lg p-4 hover:opacity-90 transition-opacity block"
               style={collection.dominantColor ? { borderColor: collection.dominantColor + '55' } : undefined}
             >
               <div className="flex items-start justify-between mb-1">
@@ -40,9 +42,9 @@ export default function CollectionsGrid({ collections }: CollectionsGridProps) {
                     <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500 shrink-0" />
                   )}
                 </div>
-                <button className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground shrink-0 -mt-0.5 transition-colors">
+                <span className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground shrink-0 -mt-0.5 transition-colors">
                   <MoreHorizontal className="w-4 h-4" />
-                </button>
+                </span>
               </div>
               <p className="text-xs text-muted-foreground mb-2">
                 {collection.itemCount} {collection.itemCount === 1 ? 'item' : 'items'}
@@ -56,7 +58,7 @@ export default function CollectionsGrid({ collections }: CollectionsGridProps) {
                   return <TypeIcon key={i} className="w-3.5 h-3.5" style={{ color }} />;
                 })}
               </div>
-            </div>
+            </NextLink>
           );
         })}
       </div>
