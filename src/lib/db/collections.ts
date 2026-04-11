@@ -167,6 +167,135 @@ export async function getUserCollections(userId: string): Promise<UserCollection
   return collections;
 }
 
+export async function getAllCollections(userId: string): Promise<CollectionCardData[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { type: true },
+          },
+        },
+      },
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+
+  return collections.map((collection) => {
+    const typeCounts: Record<string, { count: number; icon: string; color: string }> = {};
+
+    for (const ci of collection.items) {
+      const { type } = ci.item;
+      if (!typeCounts[type.id]) {
+        typeCounts[type.id] = {
+          count: 0,
+          icon: type.icon ?? DEFAULT_ICON,
+          color: type.color ?? DEFAULT_COLOR,
+        };
+      }
+      typeCounts[type.id].count++;
+    }
+
+    const typeEntries = Object.values(typeCounts).sort((a, b) => b.count - a.count);
+    const dominantColor = typeEntries[0]?.color ?? null;
+    const typeIcons: CollectionTypeIcon[] = typeEntries.map(({ icon, color }) => ({ icon, color }));
+
+    return {
+      id: collection.id,
+      name: collection.name,
+      description: collection.description,
+      isFavorite: collection.isFavorite,
+      itemCount: collection.items.length,
+      updatedAt: collection.updatedAt,
+      dominantColor,
+      typeIcons,
+    };
+  });
+}
+
+export interface CollectionWithItems {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  dominantColor: string | null;
+  itemCount: number;
+}
+
+export async function getCollectionWithItems(
+  collectionId: string,
+  userId: string
+): Promise<CollectionWithItems | null> {
+  const collection = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { type: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!collection) return null;
+
+  const typeCounts: Record<string, { count: number; color: string }> = {};
+  for (const ci of collection.items) {
+    const { type } = ci.item;
+    if (!typeCounts[type.id]) {
+      typeCounts[type.id] = { count: 0, color: type.color ?? DEFAULT_COLOR };
+    }
+    typeCounts[type.id].count++;
+  }
+  const sorted = Object.values(typeCounts).sort((a, b) => b.count - a.count);
+  const dominantColor = sorted[0]?.color ?? null;
+
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    dominantColor,
+    itemCount: collection.items.length,
+  };
+}
+
+export async function getItemsByCollection(
+  collectionId: string,
+  userId: string
+) {
+  const items = await prisma.item.findMany({
+    where: {
+      userId,
+      collections: {
+        some: { collectionId },
+      },
+    },
+    include: {
+      type: true,
+      tags: { include: { tag: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    content: item.content,
+    description: item.description,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    tags: item.tags.map((t) => t.tag.name),
+    createdAt: item.createdAt,
+    typeIcon: item.type.icon ?? DEFAULT_ICON,
+    typeColor: item.type.color ?? DEFAULT_COLOR,
+    typeName: item.type.name,
+  }));
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count(),

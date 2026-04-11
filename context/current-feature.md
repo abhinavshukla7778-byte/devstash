@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Collections Pages
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Create `/collections` page that lists all of the user's collections using the existing collection cards
+- Create `/collections/[id]` page that shows the items inside a specific collection using existing item cards
+- Link the "View all collections" text in the sidebar to `/collections`
+- Link each collection card (on dashboard and collections page) to `/collections/[id]`
+
 ## Notes
+
+- Reuse existing `CollectionCard` component for the collections grid
+- Reuse existing `ItemCard` component for the items grid inside a collection
+- Both pages are server components — fetch data directly with Prisma
+- Auth-guard: only show the authenticated user's data
+- The `/collections/[id]` page should show the collection name, description, and a grid of its items
+- If a collection has no items, show an empty state
 
 ## History
 

@@ -18,7 +18,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 interface ItemsGridProps {
   items: ItemCardData[];
-  typeColor: string;
+  typeColor?: string;
 }
 
 function formatDate(value: Date | string): string {
@@ -33,18 +33,19 @@ export default function ItemsGrid({ items, typeColor }: ItemsGridProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {items.map((item) => {
           const Icon = ICON_MAP[item.typeIcon] ?? Code;
+          const color = typeColor ?? item.typeColor;
           return (
             <div
               key={item.id}
               className="bg-card border border-border rounded-lg px-4 py-3 flex items-start gap-3 hover:opacity-90 cursor-pointer transition-opacity border-l-4"
-              style={{ borderLeftColor: typeColor }}
+              style={{ borderLeftColor: color }}
               onClick={() => setSelectedItemId(item.id)}
             >
               <div
                 className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 self-start mt-0.5"
-                style={{ backgroundColor: `${typeColor}20` }}
+                style={{ backgroundColor: `${color}20` }}
               >
-                <Icon className="w-4 h-4" style={{ color: typeColor }} />
+                <Icon className="w-4 h-4" style={{ color }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap mb-1">
