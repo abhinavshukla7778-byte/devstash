@@ -1,24 +1,12 @@
-# Current Feature: Collection Actions
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add Edit, Delete, and Favorite action buttons to the `/collections/[id]` page header
-- Favorite button is UI-only (no functionality yet, just the icon/button)
-- Edit button opens a modal to edit collection name and description
-- Delete button opens a confirmation dialog; on confirm, removes items from the collection (via CollectionItem join table) but does NOT delete the items themselves, then deletes the collection
-- On collection cards at `/collections` and dashboard, replace any existing card click behavior: clicking anywhere on the card navigates to `/collections/[id]`, but a 3-dots (MoreHorizontal) menu icon shows a dropdown with Edit, Delete, and Favorite options
-- Favorite option in the dropdown is UI-only for now
-
 ## Notes
-
-- Items are linked via CollectionItem join table — removing from collection means deleting CollectionItem records, not Item records
-- Edit modal fields: name (required), description (optional) — same as collection create
-- Delete confirmation should warn that items will be unlinked but not deleted
-- The 3-dots dropdown must stop event propagation so it doesn't trigger the card navigation click
 
 ## History
 
@@ -44,3 +32,4 @@ In Progress
 - 2026-04-11: Completed Collection Create — "New Collection" button in top bar opens a Dialog with name (required) and description (optional) fields, createCollection server action with Zod validation and user-scoped DB function, sonner toast on success/error, modal closes and page refreshes; empty collections show no color border or type icons on card/sidebar
 - 2026-04-11: Completed Add Item to Collections — multi-select CollectionSelector component added to New Item dialog and Item Drawer edit mode; fetches user-scoped collections via getUserCollections server action; wires assignments through createItem and updateItem server actions into CollectionItem join table using deleteMany + createMany sync on update
 - 2026-04-11: Completed Collections Pages — /collections page lists all user collections; /collections/[id] shows items in a specific collection with mixed-type per-item colors; collection cards on dashboard and /collections link to their /collections/[id] page; "View all" button and sidebar link both point to /collections
+- 2026-04-11: Completed Collection Actions — Edit/Delete/Favorite buttons on /collections/[id] header; Edit opens modal to update name/description; Delete confirms then unlinks items (CollectionItem rows deleted, Items kept) and redirects to /collections; Favorite is UI-only; collection cards on /collections and dashboard now navigate on click with a 3-dots dropdown for Edit, Delete, and Favorite (UI-only)
