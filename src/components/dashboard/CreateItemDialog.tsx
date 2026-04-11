@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { createItem } from '@/actions/items';
+import { getUserCollections } from '@/actions/collections';
+import CollectionSelector from '@/components/ui/CollectionSelector';
 
 const ITEM_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const;
 type ItemTypeName = (typeof ITEM_TYPES)[number];
@@ -29,6 +31,11 @@ type ItemTypeName = (typeof ITEM_TYPES)[number];
 const CONTENT_TYPES = new Set<ItemTypeName>(['snippet', 'prompt', 'command', 'note']);
 const LANGUAGE_TYPES = new Set<ItemTypeName>(['snippet', 'command']);
 const URL_TYPES = new Set<ItemTypeName>(['link']);
+
+interface Collection {
+  id: string;
+  name: string;
+}
 
 interface FormState {
   title: string;
@@ -54,6 +61,15 @@ export default function CreateItemDialog() {
   const [selectedType, setSelectedType] = useState<ItemTypeName>('snippet');
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    getUserCollections().then((result) => {
+      if (result.success && result.data) setCollections(result.data);
+    });
+  }, [open]);
 
   const showContent = CONTENT_TYPES.has(selectedType);
   const showLanguage = LANGUAGE_TYPES.has(selectedType);
@@ -71,6 +87,7 @@ export default function CreateItemDialog() {
     if (!next) {
       setForm(EMPTY_FORM);
       setSelectedType('snippet');
+      setSelectedCollectionIds([]);
     }
     setOpen(next);
   }
@@ -92,6 +109,7 @@ export default function CreateItemDialog() {
       url: form.url || null,
       language: form.language || null,
       tags,
+      collectionIds: selectedCollectionIds,
     });
 
     setSaving(false);
@@ -229,6 +247,18 @@ export default function CreateItemDialog() {
               className="text-sm"
             />
             <p className="text-xs text-muted-foreground mt-1">Comma-separated</p>
+          </div>
+
+          {/* Collections */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+              Collections
+            </label>
+            <CollectionSelector
+              collections={collections}
+              selected={selectedCollectionIds}
+              onChange={setSelectedCollectionIds}
+            />
           </div>
 
           {/* Actions */}

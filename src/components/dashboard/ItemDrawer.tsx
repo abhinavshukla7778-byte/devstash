@@ -25,7 +25,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { updateItem, deleteItem } from '@/actions/items';
+import { getUserCollections } from '@/actions/collections';
+import CollectionSelector from '@/components/ui/CollectionSelector';
 import type { ItemDetailData } from '@/lib/db/items';
+
+interface Collection {
+  id: string;
+  name: string;
+}
 
 // Types that show the content textarea
 const CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note']);
@@ -46,6 +53,7 @@ interface EditState {
   url: string;
   language: string;
   tags: string; // comma-separated
+  collectionIds: string[];
 }
 
 function formatDate(value: Date | string): string {
@@ -97,6 +105,7 @@ function buildEditState(item: ItemDetailData): EditState {
     url: item.url ?? '',
     language: item.language ?? '',
     tags: item.tags.join(', '),
+    collectionIds: item.collections.map((c) => c.id),
   };
 }
 
@@ -109,6 +118,7 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [collections, setCollections] = useState<Collection[]>([]);
 
   useEffect(() => {
     if (!itemId) {
@@ -145,6 +155,9 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     if (!item) return;
     setEditState(buildEditState(item));
     setEditMode(true);
+    getUserCollections().then((result) => {
+      if (result.success && result.data) setCollections(result.data);
+    });
   }
 
   function handleCancel() {
@@ -168,6 +181,7 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
       url: editState.url || null,
       language: editState.language || null,
       tags,
+      collectionIds: editState.collectionIds,
     });
 
     setSaving(false);
@@ -498,6 +512,18 @@ export default function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                   className="text-sm"
                 />
                 <p className="text-xs text-muted-foreground mt-1">Comma-separated</p>
+              </div>
+
+              {/* Collections */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+                  Collections
+                </label>
+                <CollectionSelector
+                  collections={collections}
+                  selected={editState.collectionIds}
+                  onChange={(ids) => setField('collectionIds', ids)}
+                />
               </div>
 
               {/* Non-editable details */}
