@@ -1,25 +1,33 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getCollectionWithItems, getItemsByCollection } from "@/lib/db/collections";
+import { COLLECTIONS_PER_PAGE } from "@/lib/constants";
 import ItemsGrid from "@/components/dashboard/ItemsGrid";
 import CollectionActionsBar from "@/components/collections/CollectionActionsBar";
+import Pagination from "@/components/ui/Pagination";
 import { Star } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
-export default async function CollectionPage({ params }: PageProps) {
+export default async function CollectionPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1);
+
   const session = await auth();
   if (!session?.user?.id) redirect("/sign-in");
 
   const [collection, items] = await Promise.all([
     getCollectionWithItems(id, session.user.id),
-    getItemsByCollection(id, session.user.id),
+    getItemsByCollection(id, session.user.id, page, COLLECTIONS_PER_PAGE),
   ]);
 
   if (!collection) notFound();
+
+  const totalPages = Math.ceil(collection.itemCount / COLLECTIONS_PER_PAGE);
 
   return (
     <div className="p-6">
@@ -48,10 +56,17 @@ export default async function CollectionPage({ params }: PageProps) {
         </div>
       </div>
 
-      {items.length === 0 ? (
+      {collection.itemCount === 0 ? (
         <p className="text-muted-foreground text-sm">No items in this collection yet.</p>
       ) : (
-        <ItemsGrid items={items} />
+        <>
+          <ItemsGrid items={items} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            buildHref={(p) => `/collections/${id}?page=${p}`}
+          />
+        </>
       )}
     </div>
   );

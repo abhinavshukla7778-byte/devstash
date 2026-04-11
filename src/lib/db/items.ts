@@ -291,25 +291,35 @@ export async function createItem(
   };
 }
 
-export async function getItemsByType(typeName: string): Promise<{ items: ItemCardData[]; typeColor: string; typeName: string } | null> {
+export async function getItemsByType(
+  typeName: string,
+  page: number,
+  perPage: number
+): Promise<{ items: ItemCardData[]; typeColor: string; typeName: string; totalCount: number } | null> {
   const type = await prisma.itemType.findFirst({
     where: { name: typeName, isSystem: true },
   });
 
   if (!type) return null;
 
-  const items = await prisma.item.findMany({
-    where: { typeId: type.id },
-    include: {
-      type: true,
-      tags: { include: { tag: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  const [items, totalCount] = await Promise.all([
+    prisma.item.findMany({
+      where: { typeId: type.id },
+      include: {
+        type: true,
+        tags: { include: { tag: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    }),
+    prisma.item.count({ where: { typeId: type.id } }),
+  ]);
 
   return {
     items: items.map(mapItem),
     typeColor: type.color ?? DEFAULT_COLOR,
     typeName: type.name,
+    totalCount,
   };
 }
