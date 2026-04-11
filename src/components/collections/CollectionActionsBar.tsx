@@ -25,7 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { updateCollection, deleteCollection } from '@/actions/collections';
+import { updateCollection, deleteCollection, toggleCollectionFavorite } from '@/actions/collections';
 
 interface CollectionActionsBarProps {
   id: string;
@@ -45,7 +45,25 @@ export default function CollectionActionsBar({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editName, setEditName] = useState(name);
   const [editDescription, setEditDescription] = useState(description ?? '');
+  const [localIsFavorite, setLocalIsFavorite] = useState(isFavorite);
   const [isPending, startTransition] = useTransition();
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
+
+  async function handleFavoriteToggle() {
+    if (togglingFavorite) return;
+    setTogglingFavorite(true);
+    const prev = localIsFavorite;
+    setLocalIsFavorite(!prev);
+    const result = await toggleCollectionFavorite(id);
+    setTogglingFavorite(false);
+    if (!result.success) {
+      setLocalIsFavorite(prev);
+      toast.error(result.error ?? 'Failed to update favorite');
+      return;
+    }
+    toast.success(result.isFavorite ? 'Added to favorites' : 'Removed from favorites');
+    router.refresh();
+  }
 
   function handleEditOpen() {
     setEditName(name);
@@ -87,11 +105,12 @@ export default function CollectionActionsBar({
         <Button
           variant="ghost"
           size="icon"
-          className="text-muted-foreground hover:text-yellow-500"
-          aria-label="Favorite"
-          disabled
+          className={`hover:text-yellow-500 ${localIsFavorite ? 'text-yellow-500' : 'text-muted-foreground'}`}
+          aria-label={localIsFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          onClick={handleFavoriteToggle}
+          disabled={togglingFavorite}
         >
-          <Star className={`w-4 h-4 ${isFavorite ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+          <Star className={`w-4 h-4 ${localIsFavorite ? 'fill-yellow-500 text-yellow-500' : ''}`} />
         </Button>
         <Button
           variant="ghost"

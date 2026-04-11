@@ -74,6 +74,35 @@ export async function createItem(input: CreateItemInput): Promise<CreateItemResu
   }
 }
 
+interface ToggleItemFavoriteResult {
+  success: boolean;
+  isFavorite?: boolean;
+  error?: string;
+}
+
+export async function toggleItemFavorite(itemId: string): Promise<ToggleItemFavoriteResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const item = await prisma.item.findUnique({
+    where: { id: itemId },
+    select: { userId: true, isFavorite: true },
+  });
+  if (!item || item.userId !== session.user.id) {
+    return { success: false, error: 'Not found' };
+  }
+
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isFavorite: !item.isFavorite },
+    select: { isFavorite: true },
+  });
+
+  return { success: true, isFavorite: updated.isFavorite };
+}
+
 interface DeleteItemResult {
   success: boolean;
   error?: string;
