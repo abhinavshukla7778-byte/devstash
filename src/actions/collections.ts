@@ -2,8 +2,23 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { createCollection as dbCreateCollection } from '@/lib/db/collections';
-import type { CollectionData } from '@/lib/db/collections';
+import { createCollection as dbCreateCollection, getUserCollections as dbGetUserCollections } from '@/lib/db/collections';
+import type { CollectionData, UserCollection } from '@/lib/db/collections';
+
+interface GetUserCollectionsResult {
+  success: boolean;
+  data?: UserCollection[];
+  error?: string;
+}
+
+export async function getUserCollections(): Promise<GetUserCollectionsResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+  const data = await dbGetUserCollections(session.user.id);
+  return { success: true, data };
+}
 
 const CreateCollectionSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
