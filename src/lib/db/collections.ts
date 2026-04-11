@@ -296,6 +296,39 @@ export async function getItemsByCollection(
   }));
 }
 
+export async function updateCollection(
+  collectionId: string,
+  userId: string,
+  data: { name: string; description: string | null }
+): Promise<CollectionData> {
+  const collection = await prisma.collection.update({
+    where: { id: collectionId, userId },
+    data: {
+      name: data.name,
+      description: data.description,
+    },
+  });
+
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    createdAt: collection.createdAt,
+    updatedAt: collection.updatedAt,
+  };
+}
+
+export async function deleteCollection(
+  collectionId: string,
+  userId: string
+): Promise<void> {
+  // CollectionItem rows are cascade-deleted by Prisma when collection is deleted
+  await prisma.collection.delete({
+    where: { id: collectionId, userId },
+  });
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   const [totalItems, totalCollections, favoriteItems, favoriteCollections] = await Promise.all([
     prisma.item.count(),

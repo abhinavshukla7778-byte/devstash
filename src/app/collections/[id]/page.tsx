@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getCollectionWithItems, getItemsByCollection } from "@/lib/db/collections";
 import ItemsGrid from "@/components/dashboard/ItemsGrid";
+import CollectionActionsBar from "@/components/collections/CollectionActionsBar";
 import { Star } from "lucide-react";
 
 interface PageProps {
@@ -23,18 +24,28 @@ export default async function CollectionPage({ params }: PageProps) {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">{collection.name}</h1>
-          {collection.isFavorite && (
-            <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-          )}
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{collection.name}</h1>
+              {collection.isFavorite && (
+                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+              )}
+            </div>
+            {collection.description && (
+              <p className="text-muted-foreground text-sm mt-1">{collection.description}</p>
+            )}
+            <p className="text-muted-foreground text-sm mt-1">
+              {collection.itemCount} {collection.itemCount === 1 ? "item" : "items"}
+            </p>
+          </div>
+          <CollectionActionsBar
+            id={collection.id}
+            name={collection.name}
+            description={collection.description}
+            isFavorite={collection.isFavorite}
+          />
         </div>
-        {collection.description && (
-          <p className="text-muted-foreground text-sm mt-1">{collection.description}</p>
-        )}
-        <p className="text-muted-foreground text-sm mt-1">
-          {collection.itemCount} {collection.itemCount === 1 ? "item" : "items"}
-        </p>
       </div>
 
       {items.length === 0 ? (
