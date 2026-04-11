@@ -1,26 +1,12 @@
-# Current Feature: Favorite Toggle (Drawer, Collection Page, Cards)
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Wire up the Favorite button in the Item Drawer action bar to actually toggle `isFavorite` on the item in the DB and reflect the new state immediately
-- Wire up the Favorite button in the Collection page (/collections/[id] header) to toggle `isFavorite` on the collection in the DB
-- Wire up the Favorite option in the 3-dots dropdown on collection cards (/collections and dashboard) to toggle `isFavorite` on the collection in the DB
-- Show active/filled star vs outline star to indicate current favorite state in all three locations
-- Refresh or optimistically update UI after toggle so the star reflects the new state without a full reload
-
 ## Notes
-
-- Item `isFavorite` and Collection `isFavorite` fields already exist in the Prisma schema
-- The Favorites Page (/favorites) already uses `getFavoriteItems` and `getFavoriteCollections` — toggling should make items/collections appear/disappear from that page on next visit
-- The Item Drawer already loads full item detail via `/api/items/[id]` — use the returned `isFavorite` field to set initial star state
-- Collection page already has Favorite button in header (currently UI-only)
-- Collection cards already have Favorite in 3-dots dropdown (currently UI-only)
-- Use Server Actions for the toggle mutations (consistent with existing patterns)
-- Show sonner toast on toggle success/error
 
 ## History
 
@@ -50,3 +36,4 @@ In Progress
 - 2026-04-11: Completed Global Search / Command Palette — Cmd+K/Ctrl+K opens a cmdk-powered command palette; client-side fuzzy search across all user items and collections; grouped results with type icons and collection item counts; item results open ItemDrawer inline, collection results navigate to /collections/[id]; TopBar search input opens palette on click with ⌘K badge hint; search data pre-fetched server-side in all three layouts
 - 2026-04-11: Completed Pagination — URL-based pagination (?page=N) on /items/[type] (21 items/page) and /collections/[id] (21 items/page); Pagination component with numbered links, ellipsis for large page counts, and greyed-out prev/next at boundaries; DB queries use skip/take to fetch only the current page; getCollectionWithItems uses _count for itemCount; constants file added for ITEMS_PER_PAGE, COLLECTIONS_PER_PAGE, DASHBOARD_COLLECTIONS_LIMIT, DASHBOARD_RECENT_ITEMS_LIMIT
 - 2026-04-11: Completed Favorites Page — /favorites route with compact terminal-style list (monospace, high density); separate Items and Collections sections with counts; each row shows type icon, title, type badge, date; click item opens ItemDrawer, click collection navigates to /collections/[id]; empty state; star icon in TopBar links to /favorites; getFavoriteItems/getFavoriteCollections DB functions user-scoped, sorted by updatedAt desc; route protection added for /favorites, /items, /collections in proxy
+- 2026-04-11: Completed Favorite Toggle — toggleItemFavorite and toggleCollectionFavorite server actions with ownership checks; Favorite button in ItemDrawer wired up with optimistic state update; Star button in CollectionActionsBar (collection page header) now functional; Favorite dropdown item in CollectionCard now functional; filled/outline star reflects live state in all three locations; sonner toast on success/error
