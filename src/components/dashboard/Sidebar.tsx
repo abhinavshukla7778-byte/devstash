@@ -189,8 +189,8 @@ export default function Sidebar({ open, onToggle, onClose, user, itemTypes, side
                         className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
                       >
                         <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: col.dominantColor }}
+                          className="w-2.5 h-2.5 rounded-full shrink-0 bg-muted-foreground/30"
+                          style={col.dominantColor ? { backgroundColor: col.dominantColor } : undefined}
                         />
                         <span className="flex-1 truncate">{col.name}</span>
                       </Link>

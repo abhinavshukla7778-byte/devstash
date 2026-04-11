@@ -1,12 +1,26 @@
-# Current Feature
+# Current Feature: Implement Collection Create
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add a "New Collection" button in the top bar (alongside the existing "New Item" button)
+- Clicking the button opens a modal dialog with fields: name (required) and description (optional)
+- Implement a `createCollection` server action in `src/actions/collections.ts` with Zod validation
+- Add a `createCollection` DB function in `src/lib/db/collections.ts` (user-scoped)
+- Show a sonner toast on success or failure
+- Close the modal and refresh the page/list after successful creation
+- Follow the same patterns as item create (Dialog, server action, Zod, toast, router.refresh)
+
 ## Notes
+
+- Collections are user-scoped — always filter/create by authenticated user's ID
+- Follow existing patterns: server components fetch via lib/db functions, client-side mutations via server actions
+- The modal should use ShadCN Dialog component
+- Validate inputs with Zod before hitting the DB
+- Keep the create button consistent with the "New Item" button styling in the top bar
 
 ## History
 

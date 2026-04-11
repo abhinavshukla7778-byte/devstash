@@ -31,7 +31,7 @@ export default function CollectionsGrid({ collections }: CollectionsGridProps) {
             <div
               key={collection.id}
               className="bg-card border rounded-lg p-4 hover:opacity-90 cursor-pointer transition-opacity"
-              style={{ borderColor: collection.dominantColor + '55' }}
+              style={collection.dominantColor ? { borderColor: collection.dominantColor + '55' } : undefined}
             >
               <div className="flex items-start justify-between mb-1">
                 <div className="flex items-center gap-2 min-w-0">
