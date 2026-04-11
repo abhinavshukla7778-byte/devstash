@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
 import {
   createCollection as dbCreateCollection,
   getUserCollections as dbGetUserCollections,
@@ -9,6 +10,37 @@ import {
   deleteCollection as dbDeleteCollection,
 } from '@/lib/db/collections';
 import type { CollectionData, UserCollection } from '@/lib/db/collections';
+
+interface ToggleCollectionFavoriteResult {
+  success: boolean;
+  isFavorite?: boolean;
+  error?: string;
+}
+
+export async function toggleCollectionFavorite(
+  collectionId: string
+): Promise<ToggleCollectionFavoriteResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const collection = await prisma.collection.findUnique({
+    where: { id: collectionId },
+    select: { userId: true, isFavorite: true },
+  });
+  if (!collection || collection.userId !== session.user.id) {
+    return { success: false, error: 'Not found' };
+  }
+
+  const updated = await prisma.collection.update({
+    where: { id: collectionId },
+    data: { isFavorite: !collection.isFavorite },
+    select: { isFavorite: true },
+  });
+
+  return { success: true, isFavorite: updated.isFavorite };
+}
 
 interface GetUserCollectionsResult {
   success: boolean;

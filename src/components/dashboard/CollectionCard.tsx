@@ -32,7 +32,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { updateCollection, deleteCollection } from '@/actions/collections';
+import { updateCollection, deleteCollection, toggleCollectionFavorite } from '@/actions/collections';
 import type { CollectionCardData } from '@/lib/db/collections';
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -55,10 +55,29 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editName, setEditName] = useState(collection.name);
   const [editDescription, setEditDescription] = useState(collection.description ?? '');
+  const [localIsFavorite, setLocalIsFavorite] = useState(collection.isFavorite);
   const [isPending, startTransition] = useTransition();
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
 
   function handleCardClick() {
     router.push(`/collections/${collection.id}`);
+  }
+
+  async function handleFavoriteToggle(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (togglingFavorite) return;
+    setTogglingFavorite(true);
+    const prev = localIsFavorite;
+    setLocalIsFavorite(!prev);
+    const result = await toggleCollectionFavorite(collection.id);
+    setTogglingFavorite(false);
+    if (!result.success) {
+      setLocalIsFavorite(prev);
+      toast.error(result.error ?? 'Failed to update favorite');
+      return;
+    }
+    toast.success(result.isFavorite ? 'Added to favorites' : 'Removed from favorites');
+    router.refresh();
   }
 
   function handleEditOpen(e: React.MouseEvent) {
@@ -113,7 +132,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
         <div className="flex items-start justify-between mb-1">
           <div className="flex items-center gap-2 min-w-0">
             <span className="font-medium truncate">{collection.name}</span>
-            {collection.isFavorite && (
+            {localIsFavorite && (
               <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500 shrink-0" />
             )}
           </div>
@@ -136,9 +155,9 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <Star className="w-4 h-4 mr-2" />
-                Favorite
+              <DropdownMenuItem onClick={handleFavoriteToggle} disabled={togglingFavorite}>
+                <Star className={`w-4 h-4 mr-2 ${localIsFavorite ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+                {localIsFavorite ? 'Unfavorite' : 'Favorite'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
