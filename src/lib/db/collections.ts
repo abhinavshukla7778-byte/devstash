@@ -230,10 +230,11 @@ export async function getCollectionWithItems(
   const collection = await prisma.collection.findFirst({
     where: { id: collectionId, userId },
     include: {
+      _count: { select: { items: true } },
       items: {
-        include: {
+        select: {
           item: {
-            include: { type: true },
+            select: { type: { select: { id: true, color: true } } },
           },
         },
       },
@@ -259,26 +260,28 @@ export async function getCollectionWithItems(
     description: collection.description,
     isFavorite: collection.isFavorite,
     dominantColor,
-    itemCount: collection.items.length,
+    itemCount: collection._count.items,
   };
 }
 
 export async function getItemsByCollection(
   collectionId: string,
-  userId: string
+  userId: string,
+  page: number,
+  perPage: number
 ) {
   const items = await prisma.item.findMany({
     where: {
       userId,
-      collections: {
-        some: { collectionId },
-      },
+      collections: { some: { collectionId } },
     },
     include: {
       type: true,
       tags: { include: { tag: true } },
     },
     orderBy: { createdAt: 'desc' },
+    skip: (page - 1) * perPage,
+    take: perPage,
   });
 
   return items.map((item) => ({
