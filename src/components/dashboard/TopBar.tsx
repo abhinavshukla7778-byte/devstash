@@ -5,9 +5,10 @@ import CreateCollectionDialog from "@/components/dashboard/CreateCollectionDialo
 
 interface TopBarProps {
   onToggleSidebar?: () => void;
+  onSearchClick?: () => void;
 }
 
-export default function TopBar({ onToggleSidebar }: TopBarProps) {
+export default function TopBar({ onToggleSidebar, onSearchClick }: TopBarProps) {
   return (
     <header className="h-14 border-b border-border flex items-center gap-3 px-4 shrink-0">
       <div className="flex items-center gap-2 w-48 shrink-0">
@@ -27,8 +28,10 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
       <div className="flex-1 max-w-xl relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Search items..."
-          className="pl-9 h-9 bg-muted border-0 text-sm"
+          placeholder="Search items and collections..."
+          className="pl-9 h-9 bg-muted border-0 text-sm cursor-pointer"
+          readOnly
+          onClick={onSearchClick}
         />
         <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground bg-background border border-border rounded px-1.5 py-0.5">
           ⌘K
